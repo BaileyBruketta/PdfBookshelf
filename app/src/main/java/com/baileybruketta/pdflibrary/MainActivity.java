@@ -303,11 +303,11 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 //savepdfindatabase(uri, titleinput.getText().toString(), authorinput.getText().toString(), genreinput.getText().toString());
 
                 SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
-                mydatabase.update("library", cv, "path = ?", new String[] {currentlyReading.toString()});
+                mydatabase.update("library", cv, "path = ?", new String[] {model.getPath()});
                 mydatabase.close();
 
                 popupWindow.dismiss();
-                //SetupCards();
+                SetupCards();
             }
         });
     }
