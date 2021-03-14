@@ -1,9 +1,11 @@
 package com.baileybruketta.pdflibrary;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -20,6 +22,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +37,8 @@ import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.ArrayList;
 
@@ -44,6 +49,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     Integer pageNumber = 0;
     String pdfFileName;
     Uri currentlyReading;
+    Uri mCropImageUri;
+    ImageView cropped_image_preview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,21 +141,62 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     public void onActivityResult(int requestCode, int resultCode, Intent result){
         Log.e("onActivityResult", "called");
         Toast.makeText(getApplicationContext(), "end file select", Toast.LENGTH_LONG);
-        //if (requestCode == RESULT_OK){
-        Uri data = result.getData();
-           // if (data.getLastPathSegment().endsWith("pdf")){
-        String pdfPath = data.getPath();
-         //       Toast.makeText(getApplicationContext(), pdfPath, Toast.LENGTH_SHORT);
-        Log.e("onActivityResult", pdfPath);
-         //   }
-       // }
+
+        if (requestCode != CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && requestCode != CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            Uri data = result.getData();
+            String pdfPath = data.getPath();
+            Log.e("onActivityResult", pdfPath);
+            AddPdfToIndex(data);
+        }
+        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            Uri imageUri = CropImage.getPickImageResultUri(this, result);
+
+            // For API >= 23 we need to check specifically that we have permissions to read external storage.
+            if (CropImage.isReadExternalStoragePermissionsRequired(this, imageUri)) {
+                // request permissions and handle the result in onRequestPermissionsResult()
+                mCropImageUri = imageUri;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+                }
+            } else {
+                // no permissions required or already grunted, can start crop image activity
+                startCropImageActivity(imageUri);
+            }
+        }
+
+        //handle cropimageactivity result
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            CropImage.ActivityResult data = CropImage.getActivityResult(result);
+            if (resultCode == RESULT_OK){
+                cropped_image_preview.setImageURI(data.getUri());
+
+            }
+        }
+
         //implement save pdf location - form popup for add title and author
 
 
         //TEST
         //displayPdfFromUri(data);
-        AddPdfToIndex(data);
 
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (mCropImageUri != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // required permissions granted, start crop image activity
+            startCropImageActivity(mCropImageUri);
+        } else {
+            Toast.makeText(this, "Cancelling, required permissions are not granted", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void startCropImageActivity(Uri imageUri) {
+        CropImage.activity(imageUri)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setMultiTouchEnabled(true)
+                .start(this);
     }
 
     public void RenderBookPreReadScreen(BookModel model){
@@ -201,9 +249,17 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         EditText authorinput  = popupView.findViewById(R.id.authorinput);
         EditText titleinput   = popupView.findViewById(R.id.titleinput);
         EditText genreinput   = popupView.findViewById(R.id.genreinput);
+        cropped_image_preview  = popupView.findViewById(R.id.imageInput);
         Button cancelbutton   = popupView.findViewById(R.id.cancelsavebutton);
         Button savebutton     = popupView.findViewById(R.id.savebutton);
 
+
+        cropped_image_preview.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                onSelectImageClick(v);
+            }
+        });
 
         //cancel clicked
         cancelbutton.setOnClickListener(new View.OnClickListener(){
@@ -222,6 +278,10 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 SetupCards();
             }
         });
+    }
+
+    public void onSelectImageClick(View view){
+        CropImage.startPickImageActivity(this);
     }
 
     private void savepdfindatabase(Uri uri, String title, String author, String genre){
@@ -303,7 +363,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             pagetogo = cursor.getInt(4);
         }
         Log.e("currentpageforload", String.valueOf(pagetogo));
-
+        mydatabase.close();
         PDFView pdfView2 = popupView.findViewById(R.id.pdfView);
         pdfView2.fromUri(uri)
                 .defaultPage(pagetogo)
@@ -378,7 +438,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         Log.e("pagechanged", String.valueOf(page));
         SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
         mydatabase.update("library", cv, "path = ?", new String[] {currentlyReading.toString()});
-
+        mydatabase.close();
     }
 
     @Override
