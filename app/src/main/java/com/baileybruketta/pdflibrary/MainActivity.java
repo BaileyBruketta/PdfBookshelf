@@ -99,6 +99,12 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
     }
 
     public void Init(){
+        //make db if must
+        SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
+        //create table if not exists (ie first instance of app) - this should probably be moved somewhere else and checked with stored device preferences
+        mydatabase.execSQL("CREATE TABLE IF NOT EXISTS library(path VARCHAR,title VARCHAR,author VARCHAR, genre VARCHAR, currentpage INT,imagepath VARCHAR);");
+        mydatabase.close();
+
         Button AddPdfButton = this.findViewById(R.id.addPdfbutton);
         AddPdfButton.setOnClickListener(new View.OnClickListener(){
            @Override
@@ -169,7 +175,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             CropImage.ActivityResult data = CropImage.getActivityResult(result);
             if (resultCode == RESULT_OK){
                 cropped_image_preview.setImageURI(data.getUri());
-
+                Log.d("image uri", data.getUri().toString());
+                mCropImageUri = data.getUri();
             }
         }
 
@@ -253,7 +260,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         Button cancelbutton   = popupView.findViewById(R.id.cancelsavebutton);
         Button savebutton     = popupView.findViewById(R.id.savebutton);
 
-
         cropped_image_preview.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -292,9 +298,12 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         values.put("author", author);
         values.put("genre", genre);
         values.put("currentpage", 0);
+        if(mCropImageUri != null){
+            values.put("imagepath", mCropImageUri.toString());
+        }
 
         //create table if not exists (ie first instance of app) - this should probably be moved somewhere else and checked with stored device preferences
-        mydatabase.execSQL("CREATE TABLE IF NOT EXISTS library(path VARCHAR,title VARCHAR,author VARCHAR, genre VARCHAR, currentpage INT);");
+        mydatabase.execSQL("CREATE TABLE IF NOT EXISTS library(path VARCHAR,title VARCHAR,author VARCHAR, genre VARCHAR, currentpage INT,imagepath VARCHAR);");
 
         // see if document is already exist
         ArrayList<BookModel> bookArray = getAllBooks();
@@ -336,6 +345,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 bookModel.setAuthor(cursor.getString(2));
                 bookModel.setGenre(cursor.getString(3));
                 bookModel.setCurrentPage(cursor.getInt(4));
+                bookModel.setImagePath(cursor.getString(5));
                 arrayList.add(bookModel);
             } while (cursor.moveToNext());
         }

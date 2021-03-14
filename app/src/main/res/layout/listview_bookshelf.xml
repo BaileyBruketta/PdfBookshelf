@@ -22,14 +22,14 @@
                 <TextView
                     android:id="@+id/titletext"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="20dp"
                     android:text="TextView"
                     android:textColor="#FFFFFF" />
 
                 <TextView
                     android:id="@+id/authortext"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="20dp"
                     android:text="TextView"
                     android:textColor="#FFFFFF" />
 
@@ -37,8 +37,7 @@
                     android:id="@+id/bookimage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:alpha=".2"
-                    android:background="#12FFFFFF"
+                    android:alpha=".5"
                     android:foreground="@android:drawable/btn_default"
                     app:srcCompat="@android:drawable/ic_menu_gallery" />
 

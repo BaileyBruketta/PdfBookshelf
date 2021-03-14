@@ -6,6 +6,7 @@ public class BookModel {
     String Genre;
     String Path;
     Integer CurrentPage;
+    String ImagePath;
 
     public String getTitle(){
         return Title;
@@ -22,6 +23,7 @@ public class BookModel {
     public Integer getCurrentPage(){
         return CurrentPage;
     }
+    public String getImagePath(){ return ImagePath;}
 
     public void setTitle(String title){
         this.Title = title;
@@ -38,4 +40,5 @@ public class BookModel {
     public void setCurrentPage(Integer page){
         this.CurrentPage = page;
     }
+    public void setImagePath(String pa){this.ImagePath = pa;}
 }

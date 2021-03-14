@@ -44,6 +44,7 @@ public class BookModelAdapter extends RecyclerView.Adapter<BookModelAdapter.View
 
         holder.title.setText(bookdata.get(position).getTitle());
         holder.author.setText(bookdata.get(position).getAuthor());
+        holder.image.setImageURI(Uri.parse(bookdata.get(position).getImagePath()));
         holder.image.setOnClickListener(new View.OnClickListener(){
            @Override
            public void onClick(View view){
