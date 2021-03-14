@@ -80,11 +80,13 @@
                 android:layout_width="175dp"
                 android:layout_height="200dp"
                 android:layout_weight="1"
+                android:adjustViewBounds="true"
                 android:alpha=".8"
-                android:background="#144E4E4E"
+                android:background="#1A4E4E4E"
+                android:cropToPadding="true"
                 android:visibility="visible"
-                app:srcCompat="@android:drawable/ic_menu_gallery"
-                tools:srcCompat="@android:drawable/ic_menu_gallery"
+                android:src="@android:drawable/ic_menu_gallery"
+                tools:ignore="MissingPrefix"
                 tools:visibility="visible" />
 
         </LinearLayout>
