@@ -42,4 +42,11 @@ dependencies {
 
     //PDF VIEWER
     implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
+
+    //glide
+    implementation 'com.github.bumptech.glide:glide:4.4.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.4.0'
+
+    
+
 }

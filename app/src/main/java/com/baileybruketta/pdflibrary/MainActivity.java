@@ -1,28 +1,32 @@
 package com.baileybruketta.pdflibrary;
 
 import android.app.Activity;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.EditText;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.github.barteksc.pdfviewer.PDFView;
@@ -31,12 +35,15 @@ import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 
+import java.util.ArrayList;
+
 public class MainActivity extends Activity implements ViewPager.OnPageChangeListener, OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener {
 
     private static final int REQUEST_CODE = 1;
 
     Integer pageNumber = 0;
     String pdfFileName;
+    Uri currentlyReading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +80,17 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     }
 
+    public void SetupCards(){
+        ArrayList<BookModel> books = getAllBooks();
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView recyclerView = findViewById(R.id.recycler_bookshelf);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new PaddingItemDecoration(5));
+
+        BookModelAdapter adapter = new BookModelAdapter(this, R.layout.listview_bookshelf, books, this);
+        recyclerView.setAdapter(adapter);
+    }
+
     public void Init(){
         Button AddPdfButton = this.findViewById(R.id.addPdfbutton);
         AddPdfButton.setOnClickListener(new View.OnClickListener(){
@@ -88,6 +106,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
             }
         });
+
+        SetupCards();
 
     }
 
@@ -126,18 +146,144 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
 
         //TEST
-        displayPdfFromUri(data);
+        //displayPdfFromUri(data);
+        AddPdfToIndex(data);
+
+    }
+
+    public void RenderBookPreReadScreen(BookModel model){
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.book_onclicked_form_popup, null);
+        int width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        int height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        boolean focusable = true;
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.showAtLocation(this.findViewById(R.id.addPdfbutton), Gravity.CENTER, 0, 0);
+
+        TextView titleview = popupView.findViewById(R.id.title_afterclick);
+        TextView authorview = popupView.findViewById(R.id.author_afterclick);
+        Button readtextbutton = popupView.findViewById(R.id.readbutton_afterclick);
+        Button cancelbutton = popupView.findViewById(R.id.cancelbutton_afterclick);
+
+        //set view
+        titleview.setText(model.getTitle());
+        authorview.setText(model.getAuthor());
+
+        //read text button
+        readtextbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                displayPdfFromUri(Uri.parse(model.getPath()));
+            }
+        });
+
+        //cancel clicked
+        cancelbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
 
     }
 
     private void AddPdfToIndex(Uri uri){
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.pdf_save_form_popup, null);
+        int width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        int height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        boolean focusable = true;
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.showAtLocation(this.findViewById(R.id.addPdfbutton), Gravity.CENTER, 0, 0);
 
+        EditText authorinput  = popupView.findViewById(R.id.authorinput);
+        EditText titleinput   = popupView.findViewById(R.id.titleinput);
+        EditText genreinput   = popupView.findViewById(R.id.genreinput);
+        Button cancelbutton   = popupView.findViewById(R.id.cancelsavebutton);
+        Button savebutton     = popupView.findViewById(R.id.savebutton);
+
+
+        //cancel clicked
+        cancelbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+        //save clicked
+        savebutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                savepdfindatabase(uri, titleinput.getText().toString(), authorinput.getText().toString(), genreinput.getText().toString());
+                popupWindow.dismiss();
+                SetupCards();
+            }
+        });
     }
 
-    private void savepdfindatabase(Uri uri, String title, String authot){
+    private void savepdfindatabase(Uri uri, String title, String author, String genre){
         SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
-        mydatabase.execSQL("CREATE TABLE IF NOT EXISTS library(path VARCHAR,title VARCHAR,author VARCHAR);");
+        ContentValues values = new ContentValues();
+        values.put("path", uri.toString());
+        values.put("title", title);
+        values.put("author", author);
+        values.put("genre", genre);
+        values.put("currentpage", 0);
+
+        //create table if not exists (ie first instance of app) - this should probably be moved somewhere else and checked with stored device preferences
+        mydatabase.execSQL("CREATE TABLE IF NOT EXISTS library(path VARCHAR,title VARCHAR,author VARCHAR, genre VARCHAR, currentpage INT);");
+
+        // see if document is already exist
+        ArrayList<BookModel> bookArray = getAllBooks();
+        if (SeeIfBookExists(bookArray, uri) == false){
+            mydatabase.insert("library", null, values);
+            Log.e("savepdfindatabase", "added book");
+        }
+
+        // to do - move file to a folder for documents
+
+        //close db
+        mydatabase.close();
     }
+
+    public boolean SeeIfBookExists(ArrayList<BookModel> books, Uri documentpath){
+        Log.e("SeeIfBookExists uri", documentpath.toString());
+        boolean retval = false;
+        for (int i = 0; i < books.size(); i++){
+            Log.e("seeIfBookExists loop", books.get(i).getPath());
+
+            if (books.get(i).getPath().equals(documentpath.toString())){
+                Log.e("seeIfBookExists", "identical path found");
+                retval = true;
+            }
+        }
+        return retval;
+    }
+
+    public ArrayList<BookModel> getAllBooks(){
+        ArrayList<BookModel> arrayList = new ArrayList<>();
+        String select_query = "SELECT * FROM library";
+        SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex", MODE_PRIVATE, null);
+        Cursor cursor = mydatabase.rawQuery(select_query, null);
+        if(cursor.moveToFirst()){
+            do{ //path,title,author,genrecurrentpage
+                BookModel bookModel = new BookModel();
+                bookModel.setPath(cursor.getString(0));
+                bookModel.setTitle(cursor.getString(1));
+                bookModel.setAuthor(cursor.getString(2));
+                bookModel.setGenre(cursor.getString(3));
+                bookModel.setCurrentPage(cursor.getInt(4));
+                arrayList.add(bookModel);
+            } while (cursor.moveToNext());
+        }
+        mydatabase.close();
+        Log.e("getAllBooks result", arrayList.toString());
+        return arrayList;
+    }
+
 
     private void displayPdfFromUri(Uri uri){
         LayoutInflater inflater = (LayoutInflater)
@@ -149,10 +295,18 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
         popupWindow.showAtLocation(this.findViewById(R.id.addPdfbutton), Gravity.CENTER, 0, 0);
 
-        PDFView pdfView = findViewById(R.id.pdfView);
+        //get current page
+        int pagetogo = 0;
+        SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex", MODE_PRIVATE, null);
+        Cursor cursor = mydatabase.rawQuery("SELECT * from library where path='"+uri.toString()+"'",null);
+        if (cursor.moveToFirst()){
+            pagetogo = cursor.getInt(4);
+        }
+        Log.e("currentpageforload", String.valueOf(pagetogo));
+
         PDFView pdfView2 = popupView.findViewById(R.id.pdfView);
         pdfView2.fromUri(uri)
-                .defaultPage(0)
+                .defaultPage(pagetogo)
                 .onPageChange(this)
                 .enableAnnotationRendering(true)
                 .onLoad(this)
@@ -161,29 +315,29 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 .onPageError(this)
                 .load();
 
+        currentlyReading = uri;
+        Button ExitButton = popupView.findViewById(R.id.exit_from_pdfviewer);
+        ExitButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                //get current page
+                pdfView2.getCurrentPage();
+                popupWindow.dismiss();
+            }
+        });
 
         //popupView.setOnTouchListener(new View.OnTouchListener() {
-        //    @Override
-        //    public boolean onTouch(View v, MotionEvent event) {
-        //        popupWindow.dismiss();
-        //        return true;
-        //    }
-        //});
+       //     @Override
+       //     public boolean onTouch(View v, MotionEvent event) {
+      //          Log.d("pdfviewontouch", "called");
+       //         popupWindow.dismiss();
+       //         return true;
+       //     }
+       // });
+
     }
 
     //pdf viewer overide functions
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     //part of initialization
@@ -216,6 +370,14 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     @Override
     public void onPageChanged(int page, int pageCount) {
+        Log.d("onpagechanged", "called");
+
+        //save the changed page
+        ContentValues cv = new ContentValues();
+        cv.put("currentpage", page);
+        Log.e("pagechanged", String.valueOf(page));
+        SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
+        mydatabase.update("library", cv, "path = ?", new String[] {currentlyReading.toString()});
 
     }
 
@@ -229,3 +391,4 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
     }
 }
+

@@ -19,24 +19,54 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="#00000000"
+            android:textColorHint="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            app:endIconTint="#FFFFFF"
+            app:hintTextColor="#FFFFFF"
+            app:startIconTint="#FFFFFF">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/titleinput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="hint" />
+                android:background="#1BFFFFFF"
+                android:hint="Enter the Title for this Document" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:textColorHint="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            app:endIconTint="#FFFFFF"
+            app:hintTextColor="#FFFFFF"
+            app:startIconTint="#FFFFFF">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/authorinput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="hint" />
+                android:background="#14FFFFFF"
+                android:hint="Enter the Author for this Document" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColorHint="#FFFFFF"
+            app:boxStrokeColor="#FFFFFF"
+            app:endIconTint="#FFFFFF"
+            app:hintTextColor="#FFFFFF"
+            app:startIconTint="#FFFFFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/genreinput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#0FFFFFFF"
+                android:hint="Enter the Genre for this Document" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
@@ -56,14 +86,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="cancel" />
+                android:background="#80FFFFFF"
+                android:text="Cancel"
+                android:textAllCaps="false"
+                app:backgroundTint="#1AFFFFFF" />
 
             <Button
                 android:id="@+id/savebutton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="save" />
+                android:background="#80FFFFFF"
+                android:text="Save"
+                android:textAllCaps="false"
+                app:backgroundTint="#1AFFFFFF" />
         </LinearLayout>
 
     </LinearLayout>
