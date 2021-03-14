@@ -220,10 +220,19 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         TextView authorview = popupView.findViewById(R.id.author_afterclick);
         Button readtextbutton = popupView.findViewById(R.id.readbutton_afterclick);
         Button cancelbutton = popupView.findViewById(R.id.cancelbutton_afterclick);
+        Button editbutton = popupView.findViewById(R.id.editbookbutton);
 
         //set view
         titleview.setText(model.getTitle());
         authorview.setText(model.getAuthor());
+
+        //edit book button
+        editbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                EditBook(model);
+            }
+        });
 
         //read text button
         readtextbutton.setOnClickListener(new View.OnClickListener(){
@@ -241,6 +250,66 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             }
         });
 
+    }
+
+    private void EditBook(BookModel model){
+        mCropImageUri = Uri.parse(model.ImagePath);
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.pdf_save_form_popup, null);
+        int width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        int height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        boolean focusable = true;
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.showAtLocation(this.findViewById(R.id.addPdfbutton), Gravity.CENTER, 0, 0);
+
+        EditText authorinput  = popupView.findViewById(R.id.authorinput);
+        EditText titleinput   = popupView.findViewById(R.id.titleinput);
+        EditText genreinput   = popupView.findViewById(R.id.genreinput);
+        cropped_image_preview  = popupView.findViewById(R.id.imageInput);
+        Button cancelbutton   = popupView.findViewById(R.id.cancelsavebutton);
+        Button savebutton     = popupView.findViewById(R.id.savebutton);
+
+        authorinput.setText(model.getAuthor());
+        titleinput.setText(model.getTitle());
+        genreinput.setText(model.getGenre());
+        cropped_image_preview.setImageURI(mCropImageUri);
+
+        cropped_image_preview.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                onSelectImageClick(v);
+            }
+        });
+
+        //cancel clicked
+        cancelbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+        //save clicked
+        savebutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+
+                ContentValues cv = new ContentValues();
+                cv.put("title", titleinput.getText().toString());
+                cv.put("author", authorinput.getText().toString());
+                cv.put("genre", genreinput.getText().toString());
+                cv.put("imagepath", mCropImageUri.toString());
+                //savepdfindatabase(uri, titleinput.getText().toString(), authorinput.getText().toString(), genreinput.getText().toString());
+
+                SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
+                mydatabase.update("library", cv, "path = ?", new String[] {currentlyReading.toString()});
+                mydatabase.close();
+
+                popupWindow.dismiss();
+                //SetupCards();
+            }
+        });
     }
 
     private void AddPdfToIndex(Uri uri){

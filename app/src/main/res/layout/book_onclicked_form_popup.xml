@@ -36,11 +36,16 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textView5"
+            <Button
+                android:id="@+id/editbookbutton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:background="#12FFFFFF"
+                android:text="Edit Details"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="#0DFFFFFF" />
 
             <Button
                 android:id="@+id/cancelbutton_afterclick"
@@ -51,7 +56,7 @@
                 android:text="Cancel"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
-                app:backgroundTint="#16FFFFFF" />
+                app:backgroundTint="#0DFFFFFF" />
 
             <Button
                 android:id="@+id/readbutton_afterclick"
@@ -62,7 +67,7 @@
                 android:text="Read"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
-                app:backgroundTint="#16FFFFFF" />
+                app:backgroundTint="#0DFFFFFF" />
 
         </LinearLayout>
     </LinearLayout>
