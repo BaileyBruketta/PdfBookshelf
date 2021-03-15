@@ -149,10 +149,12 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         Toast.makeText(getApplicationContext(), "end file select", Toast.LENGTH_LONG);
 
         if (requestCode != CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && requestCode != CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            if (result != null){
             Uri data = result.getData();
             String pdfPath = data.getPath();
             Log.e("onActivityResult", pdfPath);
             AddPdfToIndex(data);
+            }
         }
         if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             Uri imageUri = CropImage.getPickImageResultUri(this, result);
@@ -222,6 +224,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         Button cancelbutton = popupView.findViewById(R.id.cancelbutton_afterclick);
         Button editbutton = popupView.findViewById(R.id.editbookbutton);
 
+
         //set view
         titleview.setText(model.getTitle());
         authorview.setText(model.getAuthor());
@@ -269,11 +272,20 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         cropped_image_preview  = popupView.findViewById(R.id.imageInput);
         Button cancelbutton   = popupView.findViewById(R.id.cancelsavebutton);
         Button savebutton     = popupView.findViewById(R.id.savebutton);
+        Button deletebutton = popupView.findViewById(R.id.deletebutton);
+        deletebutton.setVisibility(View.VISIBLE);
 
         authorinput.setText(model.getAuthor());
         titleinput.setText(model.getTitle());
         genreinput.setText(model.getGenre());
         cropped_image_preview.setImageURI(mCropImageUri);
+
+        deletebutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                DeleteBook(model);
+            }
+        });
 
         cropped_image_preview.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -312,6 +324,35 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         });
     }
 
+    void DeleteBook(BookModel model){
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.check_before_delete_popup, null);
+        int width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        int height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        boolean focusable = true;
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        popupWindow.showAtLocation(this.findViewById(R.id.addPdfbutton), Gravity.CENTER, 0, 0);
+        Button deletebutton = popupView.findViewById(R.id.yes_delete_button);
+        Button cancelbutton = popupView.findViewById(R.id.no_delete_button);
+
+        deletebutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
+                mydatabase.delete("library", "path = ?", new String[] {model.getPath()});
+                popupWindow.dismiss();
+            }
+        });
+        cancelbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                popupWindow.dismiss();
+            }
+        });
+
+    }
+
     private void AddPdfToIndex(Uri uri){
         LayoutInflater inflater = (LayoutInflater)
                 getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -328,6 +369,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         cropped_image_preview  = popupView.findViewById(R.id.imageInput);
         Button cancelbutton   = popupView.findViewById(R.id.cancelsavebutton);
         Button savebutton     = popupView.findViewById(R.id.savebutton);
+        Button deletebutton   = popupView.findViewById(R.id.deletebutton);
+        deletebutton.setVisibility(View.INVISIBLE);
 
         cropped_image_preview.setOnClickListener(new View.OnClickListener(){
             @Override

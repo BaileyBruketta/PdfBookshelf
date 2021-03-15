@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="#3C000000">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="100dp"
-        android:background="#12FFFFFF"
+        android:layout_marginTop="200dp"
+        android:background="#40000000"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -18,57 +17,49 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/title_afterclick"
+            android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:id="@+id/author_afterclick"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView"
+            android:background="#11000000"
+            android:text="Are you sure you would like to delete?"
             android:textColor="#FFFFFF" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/editbookbutton"
+                android:id="@+id/no_delete_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="#12FFFFFF"
-                android:text="Edit Details"
+                android:background="#16FDFDFD"
+                android:text="No (Cancel)"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
-                app:backgroundTint="#0DFFFFFF" />
+                app:backgroundTint="#12000000"
+                app:iconTint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TextView"
+                android:visibility="invisible" />
 
             <Button
-                android:id="@+id/cancelbutton_afterclick"
+                android:id="@+id/yes_delete_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="#12FFFFFF"
-                android:text="Cancel"
+                android:background="#16FDFDFD"
+                android:text="Yes (Delete)"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
-                app:backgroundTint="#0DFFFFFF" />
-
-            <Button
-                android:id="@+id/readbutton_afterclick"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="#12FFFFFF"
-                android:text="Read"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="#0DFFFFFF" />
-
+                app:backgroundTint="#12000000"
+                app:iconTint="#FFFFFF" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
