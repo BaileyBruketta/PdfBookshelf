@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -112,20 +113,53 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                AddPdfButtonClicked();
            }
         });
+
         Button searchButton = this.findViewById(R.id.SearchButton);
+        EditText searchin = this.findViewById(R.id.searchinput);
         searchButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-
+                SearchButtonClicked(searchin.getText().toString());
+                InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(v.getApplicationWindowToken(),0);
             }
+        });
+
+        Button cancelsearchbutton = this.findViewById(R.id.cancelsearchbutton);
+        cancelsearchbutton.setVisibility(View.INVISIBLE);
+        cancelsearchbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                cancelbuttonclicked();
+            }
+
         });
 
         SetupCards();
 
     }
+    public void emptySearchBar(){
+        EditText searchin = this.findViewById(R.id.searchinput);
+        searchin.getText().clear();
+        searchin.clearFocus();
+    }
+    public void cancelbuttonclicked(){
+        Button cancelsearchbutton = this.findViewById(R.id.cancelsearchbutton);
+        cancelsearchbutton.setVisibility(View.INVISIBLE);
+        SetupCards();
+    }
+    public void SearchButtonClicked(String term){
 
-    public static void SearchButtonClicked(){
-
+        ArrayList<BookModel> books = getBooksByTerm(term);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView recyclerView = findViewById(R.id.recycler_bookshelf);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new PaddingItemDecoration(5));
+        BookModelAdapter adapter = new BookModelAdapter(this, R.layout.listview_bookshelf, books, this);
+        recyclerView.setAdapter(adapter);
+        Button cancelsearchbutton = this.findViewById(R.id.cancelsearchbutton);
+        cancelsearchbutton.setVisibility(View.VISIBLE);
+        emptySearchBar();
     }
     public void AddPdfButtonClicked(){
 
@@ -223,11 +257,13 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         Button readtextbutton = popupView.findViewById(R.id.readbutton_afterclick);
         Button cancelbutton = popupView.findViewById(R.id.cancelbutton_afterclick);
         Button editbutton = popupView.findViewById(R.id.editbookbutton);
+        ImageView previewbook = popupView.findViewById(R.id.book_preview_image);
 
 
         //set view
         titleview.setText(model.getTitle());
         authorview.setText(model.getAuthor());
+        previewbook.setImageURI(Uri.parse(model.ImagePath));
 
         //edit book button
         editbutton.setOnClickListener(new View.OnClickListener(){
@@ -283,7 +319,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         deletebutton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                DeleteBook(model);
+                DeleteBook(model, popupWindow);
             }
         });
 
@@ -324,7 +360,7 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         });
     }
 
-    void DeleteBook(BookModel model){
+    void DeleteBook(BookModel model, PopupWindow caller){
         LayoutInflater inflater = (LayoutInflater)
                 getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.check_before_delete_popup, null);
@@ -342,6 +378,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
                 SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
                 mydatabase.delete("library", "path = ?", new String[] {model.getPath()});
                 popupWindow.dismiss();
+                caller.dismiss();
+                SetupCards();
             }
         });
         cancelbutton.setOnClickListener(new View.OnClickListener(){
@@ -463,6 +501,20 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         }
         mydatabase.close();
         Log.e("getAllBooks result", arrayList.toString());
+        return arrayList;
+    }
+
+    public ArrayList<BookModel> getBooksByTerm(String term){
+        ArrayList<BookModel> arrayList = new ArrayList();
+        ArrayList<BookModel> allbooks = getAllBooks();
+        for (int i = 0; i < allbooks.size(); i++){
+            if (allbooks.get(i).getTitle().toLowerCase().contains(term.toLowerCase())){
+                arrayList.add(allbooks.get(i));
+            }else if(allbooks.get(i).getAuthor().toLowerCase().contains(term.toLowerCase())){
+                arrayList.add(allbooks.get(i));
+            }
+
+        }
         return arrayList;
     }
 

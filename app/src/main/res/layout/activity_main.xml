@@ -38,6 +38,7 @@
         app:rippleColor="#FFFFFF" />
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -57,6 +58,7 @@
             app:hintTextColor="#ADFFFFFF">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/searchinput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#120E0D0D"
@@ -69,7 +71,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#00FFFFFF"
+            android:background="#03FFFFFF"
             android:drawableLeft="@android:drawable/ic_menu_search"
             android:text="Search"
             android:textAllCaps="false"
@@ -91,6 +93,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.72" />
+        app:layout_constraintVertical_bias="0.72" >
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/cancelsearchbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="56dp"
+        android:layout_marginLeft="56dp"
+        android:layout_marginTop="137dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginBottom="245dp"
+        android:background="#0DFFFFFF"
+        android:text="Cancel Search"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="#0DFFFFFF"
+        app:layout_constraintBottom_toTopOf="@+id/addPdfbutton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.718"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/recycler_bookshelf"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

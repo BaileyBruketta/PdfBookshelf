@@ -70,5 +70,11 @@
                 app:backgroundTint="#0DFFFFFF" />
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/book_preview_image"
+            android:layout_width="200dp"
+            android:layout_height="250dp"
+            app:srcCompat="@android:drawable/ic_menu_gallery" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
