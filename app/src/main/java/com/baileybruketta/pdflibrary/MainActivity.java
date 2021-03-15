@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +14,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -99,7 +102,41 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         recyclerView.setAdapter(adapter);
     }
 
+    public void setprefs(){
+        SharedPreferences sHaredPreferences = getSharedPreferences("devshar", MODE_PRIVATE);
+        SharedPreferences.Editor mydevpref = sHaredPreferences.edit();
+        mydevpref.putString("tut", "complete");
+        mydevpref.commit();
+    }
+
+    public void tutorial(){
+        SharedPreferences sHaredPreferences = getSharedPreferences("devshar", MODE_PRIVATE);
+        SharedPreferences.Editor mydevpref = sHaredPreferences.edit();
+        if (!sHaredPreferences.getString("tut","").equals("complete")){
+            LayoutInflater inflater = (LayoutInflater)
+                    getSystemService(LAYOUT_INFLATER_SERVICE);
+            View popupView = inflater.inflate(R.layout.first_time_use_instructions, null);
+            int width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+            int height = ConstraintLayout.LayoutParams.MATCH_PARENT;
+            boolean focusable = true;
+            final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+            popupWindow.showAtLocation(this.findViewById(R.id.addPdfbutton), Gravity.CENTER, 0, 0);
+
+            Button closebutton = popupView.findViewById(R.id.close_init_popup_button);
+            closebutton.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    popupWindow.dismiss();
+                }
+            });
+
+            setprefs();
+        }
+    }
+
     public void Init(){
+
+
         //make db if must
         SQLiteDatabase mydatabase = openOrCreateDatabase("bookindex",MODE_PRIVATE,null);
         //create table if not exists (ie first instance of app) - this should probably be moved somewhere else and checked with stored device preferences
@@ -127,6 +164,11 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
 
         Button cancelsearchbutton = this.findViewById(R.id.cancelsearchbutton);
         cancelsearchbutton.setVisibility(View.INVISIBLE);
+        cancelsearchbutton.post(new Runnable(){
+            public void run(){
+                tutorial();
+            }
+        });
         cancelsearchbutton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -136,6 +178,8 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         });
 
         SetupCards();
+
+
 
     }
     public void emptySearchBar(){
@@ -162,7 +206,6 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
         emptySearchBar();
     }
     public void AddPdfButtonClicked(){
-
         String devManu = Build.MANUFACTURER;
 
         if (devManu.toLowerCase() == "samsung") {
@@ -584,6 +627,12 @@ public class MainActivity extends Activity implements ViewPager.OnPageChangeList
             winParams.flags &= ~bits;
         }
         win.setAttributes(winParams);
+
+
+        //win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        WindowManager.LayoutParams params = win.getAttributes();
+        params.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+        win.setAttributes(params);
     }
 
 

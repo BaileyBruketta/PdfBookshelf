@@ -38,7 +38,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:alpha=".5"
-                    android:foreground="@android:drawable/btn_default"
                     app:srcCompat="@android:drawable/ic_menu_gallery" />
 
             </LinearLayout>
